@@ -31,11 +31,21 @@ SAKAMORI is an integrated management system for liquor retailers in Japan. It ai
 - Project basic setup
 - Next.js + TypeScript development environment
 - TailwindCSS setup
-- Authentication components (SignUp form)
+- Authentication foundation
+  - Firebase Authentication integration
+  - Sign-in functionality (backend)
+  - Sign-up functionality (backend)
+  - Sign-out functionality (backend)
+  - Password reset functionality (backend)
 
 ### In Progress
-- Firebase authentication integration
+- Authentication UI/UX
+  - Sign-out button implementation
+  - Password reset page and form
 - User management functionality
+  - User profile management
+  - User role management (admin, staff)
+  - User data persistence with Firestore
 
 ### Not Yet Implemented
 - Backend API
