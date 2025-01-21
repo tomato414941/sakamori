@@ -40,7 +40,7 @@ describe('AuthProvider', () => {
       <div>
         <div data-testid="loading">{auth.loading.toString()}</div>
         <div data-testid="user">{auth.user ? 'logged in' : 'logged out'}</div>
-        <div data-testid="error">{auth.error?.message || 'no error'}</div>
+        <div data-testid="error">{auth.error ? auth.error.message : 'no error'}</div>
         <button onClick={() => auth.signIn('test@example.com', 'password')}>
           Sign In
         </button>
@@ -179,7 +179,7 @@ describe('AuthProvider', () => {
 
   it('handles auth errors', async () => {
     // Setup sign-in mock
-    const mockError = new Error('Auth error');
+    const mockError = new Error('Invalid credentials');
     const signInWithEmailAndPassword = jest.spyOn(firebaseAuth, 'signInWithEmailAndPassword');
     signInWithEmailAndPassword.mockRejectedValueOnce(mockError);
 
@@ -194,19 +194,17 @@ describe('AuthProvider', () => {
       expect(screen.getByTestId('loading')).toHaveTextContent('false');
     });
 
-    // Attempt sign-in and wait for error
-    await act(async () => {
-      const signInButton = screen.getByText('Sign In');
-      fireEvent.click(signInButton);
+    // Attempt sign-in
+    const signInButton = screen.getByText('Sign In');
+    fireEvent.click(signInButton);
 
-      // Wait for error to occur
-      await waitFor(() => {
-        expect(screen.getByTestId('error')).toHaveTextContent(mockError.message);
-      });
+    // Wait for error to occur
+    await waitFor(() => {
+      expect(screen.getByTestId('error')).toHaveTextContent('Invalid credentials');
     });
 
     // Check error message
-    expect(screen.getByTestId('error')).toHaveTextContent(mockError.message);
+    expect(screen.getByTestId('error')).toHaveTextContent('Invalid credentials');
   });
 
   it('cleans up auth listener on unmount', () => {

@@ -8,7 +8,7 @@ export function SignUpForm() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [message, setMessage] = useState('');
-  const { signUp, loading } = useAuth();
+  const { signUp, loading, setLoading } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -19,14 +19,17 @@ export function SignUpForm() {
     }
 
     try {
+      setLoading(true);
       await signUp(email, password);
       setMessage('Account created successfully');
       // Reset form
       setEmail('');
       setPassword('');
       setConfirmPassword('');
-    } catch (error: any) {
-      setMessage(`Error: ${error.message}`);
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'An unknown error occurred');
+    } finally {
+      setLoading(false);
     }
   };
 
