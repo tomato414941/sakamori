@@ -97,6 +97,101 @@ src/
 - Don't duplicate test coverage
 - Don't ignore test failures
 
+## Error Handling Tests
+
+### Testing Approach
+1. **エラーの種類ごとのテスト**
+   - ユーザー入力エラー
+   - API/サービスエラー
+   - ネットワークエラー
+   - バリデーションエラー
+
+2. **エラー状態の検証**
+   - エラーメッセージの表示
+   - UIの状態変更
+   - エラー後のリカバリー
+
+### Example: Authentication Error Test
+```typescript
+it('handles auth errors', async () => {
+  // エラーを発生させるモックの設定
+  mockSignIn.mockRejectedValue(new Error('Auth error'));
+
+  // コンポーネントのレンダリング
+  render(<AuthComponent />);
+
+  // ユーザーアクションの実行
+  await userEvent.click(screen.getByText('Sign In'));
+
+  // エラー状態の検証
+  expect(screen.getByTestId('error')).toHaveTextContent('Auth error');
+});
+```
+
+## Mocking Best Practices
+
+### 1. モックの粒度
+- **ユニットテスト**: 外部依存を完全にモック
+- **統合テスト**: 重要な依存のみ実装を保持
+- **E2Eテスト**: モックを最小限に抑える
+
+### 2. モック実装のガイドライン
+```typescript
+// 良い例：具体的な実装
+const mockAuth = {
+  signIn: jest.fn().mockImplementation(async (email, password) => {
+    if (!email || !password) {
+      throw new Error('Invalid credentials');
+    }
+    return { user: { email } };
+  })
+};
+
+// 避けるべき例：過度に単純化
+const mockAuth = {
+  signIn: jest.fn().mockResolvedValue({ success: true })
+};
+```
+
+### 3. モックの再利用
+- `__mocks__` ディレクトリを活用
+- 共通のモックファクトリを作成
+- テスト間でモックを共有
+
+## Asynchronous Testing
+
+### 1. 非同期処理の待機
+```typescript
+// React Testing Libraryのactを使用
+await act(async () => {
+  await userEvent.click(button);
+  await Promise.resolve(); // マイクロタスクの完了を待機
+});
+
+// 状態の変更を待機
+await waitFor(() => {
+  expect(screen.getByText('Success')).toBeInTheDocument();
+});
+```
+
+### 2. タイミング制御
+- `jest.useFakeTimers()`でタイマーを制御
+- `jest.advanceTimersByTime()`で時間を進める
+- `jest.runAllTimers()`ですべてのタイマーを実行
+
+### 3. 非同期エラーの処理
+```typescript
+// エラーハンドリングのテスト
+await expect(async () => {
+  await component.triggerAsyncAction();
+}).rejects.toThrow('Expected error');
+
+// 非同期エラー後のUI更新の検証
+await waitFor(() => {
+  expect(screen.getByText('Error occurred')).toBeInTheDocument();
+});
+```
+
 ## Future Improvements
 - [ ] Add E2E testing with Cypress
 - [ ] Implement visual regression testing
