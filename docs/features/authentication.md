@@ -1,32 +1,32 @@
 # Authentication
 
 ## Overview
-SAKAMORIの認証システムは、Firebase Authenticationを利用して実装されています。このドキュメントでは、認証機能の実装詳細と使用方法について説明します。
+SAKAMORI's authentication system is implemented using Firebase Authentication. This document explains the implementation details and usage of the authentication features.
 
-## 機能
-- メールアドレス/パスワードによるサインイン
-- 新規ユーザー登録
-- サインアウト
-- パスワードリセット
+## Features
+- Email/Password Sign-in
+- New User Registration
+- Sign-out
+- Password Reset
 
-## 実装構成
+## Implementation Structure
 
-### コンポーネント構造
+### Component Structure
 ```
 src/
 ├── components/
 │   └── auth/
-│       ├── AuthProvider.tsx      # 認証状態の管理
-│       ├── SignInForm.tsx        # サインインフォーム
-│       └── SignUpForm.tsx        # サインアップフォーム
+│       ├── AuthProvider.tsx      # Authentication state management
+│       ├── SignInForm.tsx        # Sign-in form
+│       └── SignUpForm.tsx        # Sign-up form
 └── hooks/
-    └── useAuth.ts               # 認証フックス
+    └── useAuth.ts               # Authentication hook
 ```
 
 ### AuthProvider
-認証状態を管理し、アプリケーション全体で認証情報を共有するためのコンテキストプロバイダーです。
+Authentication state is managed and authentication information is shared throughout the application using this context provider.
 
-#### 使用方法
+#### Usage
 ```tsx
 // _app.tsx
 import { AuthProvider } from '@/components/auth/AuthProvider';
@@ -40,19 +40,19 @@ function MyApp({ Component, pageProps }) {
 }
 ```
 
-#### 提供される機能
-- `user`: 現在のユーザー情報
-- `loading`: 認証状態の読み込み状態
-- `error`: 認証エラー情報
-- `signIn`: サインイン関数
-- `signUp`: サインアップ関数
-- `signOut`: サインアウト関数
-- `resetPassword`: パスワードリセット関数
+#### Provided Features
+- `user`: Current user information
+- `loading`: Authentication loading state
+- `error`: Authentication error information
+- `signIn`: Sign-in function
+- `signUp`: Sign-up function
+- `signOut`: Sign-out function
+- `resetPassword`: Password reset function
 
 ### useAuth Hook
-AuthProviderの機能を簡単に利用するためのカスタムフックです。
+A custom hook to easily use AuthProvider's features.
 
-#### 使用方法
+#### Usage
 ```tsx
 import { useAuth } from '@/hooks/useAuth';
 
@@ -63,86 +63,85 @@ function MyComponent() {
     try {
       await signIn('user@example.com', 'password');
     } catch (error) {
-      console.error('サインインに失敗しました:', error);
+      console.error('Sign-in failed:', error);
     }
   };
 
   return (
     <div>
       {user ? (
-        <p>ようこそ、{user.email}さん</p>
+        <p>Welcome, {user.email}</p>
       ) : (
-        <button onClick={handleSignIn}>サインイン</button>
+        <button onClick={handleSignIn}>Sign-in</button>
       )}
-      {error && <p>エラー: {error.message}</p>}
+      {error && <p>Error: {error.message}</p>}
     </div>
   );
 }
 ```
 
-## エラーハンドリング
-認証機能は以下のようなエラーを適切に処理します：
+## Error Handling
+The authentication feature properly handles the following errors:
 
-### 想定されるエラー
-1. サインイン失敗
-   - 無効なメールアドレス/パスワード
-   - 存在しないアカウント
-2. サインアップ失敗
-   - すでに使用されているメールアドレス
-   - パスワード要件不足
-3. パスワードリセット失敗
-   - 存在しないメールアドレス
-   - メール送信の失敗
+### Expected Errors
+1. Sign-in failure
+   - Invalid email/password
+   - Non-existent account
+2. Sign-up failure
+   - Email already in use
+   - Password requirements not met
+3. Password reset failure
+   - Non-existent email
+   - Email sending failure
 
-### エラー処理の実装
+### Error Handling Implementation
 ```tsx
 try {
   await signIn(email, password);
 } catch (error) {
-  // エラーはAuthProviderで自動的に状態に保存されます
-  // error.messageでエラーメッセージを取得可能
+  // Error is automatically saved in AuthProvider's state
+  // error.message can be used to get the error message
 }
 ```
 
-## テスト
-認証機能は、Jest + React Testing Libraryを使用して徹底的にテストされています。
+## Testing
+The authentication feature is thoroughly tested using Jest + React Testing Library.
 
-### テストの範囲
-1. 認証状態の管理
-   - 初期状態の確認
-   - 状態変更の検証
-2. エラーハンドリング
-   - 各種エラーケースの検証
-   - エラーメッセージの表示
-3. ユーザーインタラクション
-   - フォーム入力の処理
-   - ボタンクリックの処理
+### Test Scope
+1. Authentication state management
+   - Initial state verification
+   - State change verification
+2. Error handling
+   - Verification of various error cases
+   - Error message display
+3. User interaction
+   - Form input processing
+   - Button click processing
 
-### テストの実行
+### Running Tests
 ```bash
-# 全テストの実行
+# Run all tests
 npm test
 
-# 認証関連のテストのみ実行
+# Run only authentication-related tests
 npm test auth
 ```
 
-## セキュリティ考慮事項
-1. パスワードの要件
-   - 最小8文字
-   - 大文字小文字を含む
-   - 数字を含む
+## Security Considerations
+1. Password requirements
+   - Minimum 8 characters
+   - At least one uppercase letter
+   - At least one number
+2. Rate limiting
+   - Sign-in attempt limit
+   - Password reset email sending limit
 
-2. レート制限
-   - サインイン試行回数の制限
-   - パスワードリセットメールの送信回数制限
+3. Session management
+   - Automatic sign-out (not implemented)
+   - Device management (not implemented)
 
-3. セッション管理
-   - 自動サインアウト（未実装）
-   - デバイス管理（未実装）
-
-## 今後の改善予定
-- [ ] ソーシャルログインの追加
-- [ ] 二要素認証の実装
-- [ ] セッション管理の強化
-- [ ] ユーザープロフィールの拡充
+## Future Enhancements
+- [ ] Social login addition
+- [ ] Two-factor authentication implementation
+- [ ] Session management strengthening
+- [ ] User profile expansion

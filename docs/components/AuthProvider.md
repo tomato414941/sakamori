@@ -1,17 +1,17 @@
 # AuthProvider Component
 
 ## Overview
-`AuthProvider`は、SAKAMORIアプリケーション全体で認証状態を管理するためのコンテキストプロバイダーコンポーネントです。Firebase Authenticationと統合され、ユーザーの認証状態を一元管理します。
+`AuthProvider` is a context provider component that manages authentication state throughout the SAKAMORI application. It integrates with Firebase Authentication to centrally manage user authentication states.
 
-## 機能
-- 認証状態の管理と提供
-- ユーザーのサインイン/サインアウト処理
-- エラーハンドリング
-- ローディング状態の管理
+## Features
+- Authentication state management and provision
+- User sign-in/sign-out handling
+- Error handling
+- Loading state management
 
-## 実装
+## Implementation
 
-### インターフェース
+### Interfaces
 ```typescript
 interface AuthState {
   user: User | null;
@@ -27,7 +27,9 @@ interface AuthContextType extends AuthState {
 }
 ```
 
-### 使用方法
+### Usage
+
+### Using Authentication State
 ```tsx
 // アプリケーションのルートで使用
 import { AuthProvider } from '@/components/auth/AuthProvider';
@@ -59,23 +61,23 @@ function ProtectedComponent() {
 }
 ```
 
-## エラーハンドリング
+## Error Handling
 
-### エラーの種類
-1. **認証エラー**
-   - 無効な認証情報
-   - アカウント未存在
-   - パスワード不一致
+### Types of Errors
+1. **Authentication Errors**
+   - Invalid authentication credentials
+   - Non-existent account
+   - Password mismatch
 
-2. **ネットワークエラー**
-   - 接続エラー
-   - タイムアウト
+2. **Network Errors**
+   - Connection errors
+   - Timeouts
 
-3. **その他のエラー**
-   - 予期せぬエラー
-   - Firebaseサービスエラー
+3. **Other Errors**
+   - Unexpected errors
+   - Firebase service errors
 
-### エラー処理の実装
+### Error Handling Implementation
 ```typescript
 try {
   setState(prev => ({ ...prev, loading: true, error: null }));
@@ -90,24 +92,23 @@ try {
 }
 ```
 
-## テスト
+## Testing
 
-### テストケース
-1. **初期状態**
-   - 適切な初期値の設定
-   - ローディング状態の確認
+### Test Cases
+1. **Initial State**
+   - Proper initial values
+   - Loading state verification
 
-2. **認証フロー**
-   - サインイン成功/失敗
-   - サインアウト処理
-   - パスワードリセット
+2. **Authentication Flow**
+   - Successful sign-in/sign-out
+   - Password reset
 
-3. **エラーハンドリング**
-   - 各種エラーの適切な処理
-   - エラーメッセージの表示
-   - 状態の回復
+3. **Error Handling**
+   - Proper error handling
+   - Error message display
+   - State recovery
 
-### テスト例
+### Test Example
 ```typescript
 describe('AuthProvider', () => {
   it('provides initial auth state', async () => {
@@ -139,25 +140,25 @@ describe('AuthProvider', () => {
 });
 ```
 
-## パフォーマンス考慮事項
+## Performance Considerations
 
-### メモ化
-- 状態更新の最適化
-- 不要な再レンダリングの防止
-- コンテキスト分割の検討
+### Memoization
+- Optimized state updates
+- Prevention of unnecessary re-renders
+- Context splitting consideration
 
-### クリーンアップ
-- リスナーの適切な解除
-- メモリリークの防止
-- 状態のリセット
+### Cleanup
+- Proper listener removal
+- Prevention of memory leaks
+- State reset
 
-## セキュリティ考慮事項
-1. 認証状態の保護
-2. セッション管理
-3. エラーメッセージの適切な表示
+## Security Considerations
+1. Authentication state protection
+2. Session management
+3. Proper error message display
 
-## 今後の改善予定
-- [ ] リフレッシュトークンの実装
-- [ ] セッションタイムアウトの管理
-- [ ] 多要素認証のサポート
-- [ ] ソーシャルログインの統合
+## Future Improvements
+- [ ] Implement refresh tokens
+- [ ] Manage session timeouts
+- [ ] Support multi-factor authentication
+- [ ] Integrate social login

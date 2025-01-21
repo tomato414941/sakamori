@@ -1,21 +1,21 @@
-# ブランチ戦略
+# Branch Strategy
 
-迅速な開発のために最適化されたシンプルな2層構造を採用しています。
+We adopt a simple two-layer structure optimized for rapid development.
 
-## ブランチ構造
-- `main`: 本番ブランチ（常にデプロイ可能な状態を維持）
-- `feature/*`: 機能開発ブランチ（`main`から分岐し、直接`main`にマージ）
+## Branch Structure
+- `main`: Production branch (always maintained in a deployable state)
+- `feature/*`: Feature development branches (branched from `main` and merged directly back to `main`)
 
-## 開発フロー
-- 主要な機能開発：`feature/*`ブランチを作成
-- 軽微な変更：`main`に直接コミット
-- リリース管理：タグで管理（`v1.0.0`, `v1.0.1`など）
+## Development Flow
+- Major feature development: Create a `feature/*` branch
+- Minor changes: Commit directly to `main`
+- Release management: Managed with tags (e.g., `v1.0.0`, `v1.0.1`)
 
-## コミットメッセージ規約
-- `feat:` 新機能の追加
-- `fix:` バグ修正
-- `docs:` ドキュメントの更新
-- `style:` コードスタイルの修正（フォーマットなど）
-- `refactor:` リファクタリング
-- `test:` テストコードの追加・修正
-- `chore:` ビルドプロセスやツールの変更
+## Commit Message Convention
+- `feat:` Add new features
+- `fix:` Bug fixes
+- `docs:` Documentation updates
+- `style:` Code style changes (formatting, etc.)
+- `refactor:` Code refactoring
+- `test:` Add or modify test code
+- `chore:` Changes to build process or tools
