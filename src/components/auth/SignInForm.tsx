@@ -23,10 +23,11 @@ export function SignInForm() {
     <div className="flex items-center justify-center">
       <div className="bg-white p-8 rounded-lg shadow-md w-96">
         <h1 className="text-2xl font-bold mb-6">サインイン</h1>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4" role="form">
           <div>
-            <label className="block text-sm font-medium text-gray-700">メールアドレス</label>
+            <label htmlFor="email" className="block text-sm font-medium text-gray-700">メールアドレス</label>
             <input
+              id="email"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -35,8 +36,9 @@ export function SignInForm() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700">パスワード</label>
+            <label htmlFor="password" className="block text-sm font-medium text-gray-700">パスワード</label>
             <input
+              id="password"
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}

@@ -38,12 +38,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const signIn = async (email: string, password: string) => {
     try {
-      setState((prev) => ({ ...prev, loading: true }));
+      setState((prev) => ({ ...prev, loading: true, error: null }));
       await signInWithEmailAndPassword(auth, email, password);
-      setState((prev) => ({ ...prev, error: null }));
     } catch (error) {
-      setState((prev) => ({ ...prev, error: error as Error }));
-      throw error;
+      setState((prev) => ({
+        ...prev,
+        error: error instanceof Error ? error : new Error('An unknown error occurred'),
+      }));
     } finally {
       setState((prev) => ({ ...prev, loading: false }));
     }
@@ -51,12 +52,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const signUp = async (email: string, password: string) => {
     try {
-      setState((prev) => ({ ...prev, loading: true }));
+      setState((prev) => ({ ...prev, loading: true, error: null }));
       await createUserWithEmailAndPassword(auth, email, password);
-      setState((prev) => ({ ...prev, error: null }));
     } catch (error) {
-      setState((prev) => ({ ...prev, error: error as Error }));
-      throw error;
+      setState((prev) => ({
+        ...prev,
+        error: error instanceof Error ? error : new Error('An unknown error occurred'),
+      }));
     } finally {
       setState((prev) => ({ ...prev, loading: false }));
     }
@@ -64,12 +66,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const signOut = async () => {
     try {
-      setState((prev) => ({ ...prev, loading: true }));
+      setState((prev) => ({ ...prev, loading: true, error: null }));
       await firebaseSignOut(auth);
-      setState((prev) => ({ ...prev, error: null }));
     } catch (error) {
-      setState((prev) => ({ ...prev, error: error as Error }));
-      throw error;
+      setState((prev) => ({
+        ...prev,
+        error: error instanceof Error ? error : new Error('An unknown error occurred'),
+      }));
     } finally {
       setState((prev) => ({ ...prev, loading: false }));
     }
@@ -77,12 +80,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const resetPassword = async (email: string) => {
     try {
-      setState((prev) => ({ ...prev, loading: true }));
+      setState((prev) => ({ ...prev, loading: true, error: null }));
       await sendPasswordResetEmail(auth, email);
-      setState((prev) => ({ ...prev, error: null }));
     } catch (error) {
-      setState((prev) => ({ ...prev, error: error as Error }));
-      throw error;
+      setState((prev) => ({
+        ...prev,
+        error: error instanceof Error ? error : new Error('An unknown error occurred'),
+      }));
     } finally {
       setState((prev) => ({ ...prev, loading: false }));
     }
