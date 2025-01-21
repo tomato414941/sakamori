@@ -1,4 +1,4 @@
-import { render, screen, act } from '@testing-library/react';
+import { render, screen, act, waitFor, fireEvent } from '@testing-library/react';
 import { AuthProvider } from '../AuthProvider';
 import { useAuth } from '@/hooks/useAuth';
 import { AuthContext } from '../AuthProvider';
@@ -62,16 +62,16 @@ describe('AuthProvider', () => {
       </AuthProvider>
     );
 
-    // 初期状態をチェック
+    // Check initial state
     expect(screen.getByTestId('loading')).toHaveTextContent('true');
-    
-    // 非同期処理の完了を待つ
-    await act(async () => {
-      await Promise.resolve();
+    expect(screen.getByTestId('user')).toHaveTextContent('logged out');
+
+    // Wait for async operations to complete
+    await waitFor(() => {
+      expect(screen.getByTestId('loading')).toHaveTextContent('false');
     });
 
-    // 認証状態の更新後をチェック
-    expect(screen.getByTestId('loading')).toHaveTextContent('false');
+    // Check state after authentication update
     expect(screen.getByTestId('user')).toHaveTextContent('logged out');
     expect(screen.getByTestId('error')).toHaveTextContent('no error');
   });
@@ -178,10 +178,10 @@ describe('AuthProvider', () => {
   });
 
   it('handles auth errors', async () => {
-    // サインインのモックを設定
-    firebaseAuth.signInWithEmailAndPassword.mockImplementation(() => {
-      return Promise.reject(new Error('Auth error'));
-    });
+    // Setup sign-in mock
+    const mockError = new Error('Auth error');
+    const signInWithEmailAndPassword = jest.spyOn(firebaseAuth, 'signInWithEmailAndPassword');
+    signInWithEmailAndPassword.mockRejectedValueOnce(mockError);
 
     render(
       <AuthProvider>
@@ -189,23 +189,24 @@ describe('AuthProvider', () => {
       </AuthProvider>
     );
 
-    // 初期状態の非同期処理を待つ
-    await act(async () => {
-      await Promise.resolve();
+    // Wait for initial async operations
+    await waitFor(() => {
+      expect(screen.getByTestId('loading')).toHaveTextContent('false');
     });
 
-    // サインインを試行し、エラーが発生するのを待つ
+    // Attempt sign-in and wait for error
     await act(async () => {
-      screen.getByText('Sign In').click();
-      // エラーが発生するのを待つ
-      await Promise.resolve();
+      const signInButton = screen.getByText('Sign In');
+      fireEvent.click(signInButton);
+
+      // Wait for error to occur
+      await waitFor(() => {
+        expect(screen.getByTestId('error')).toHaveTextContent(mockError.message);
+      });
     });
 
-    // エラーメッセージを確認
-    await act(async () => {
-      await Promise.resolve();
-      expect(screen.getByTestId('error')).toHaveTextContent('Auth error');
-    });
+    // Check error message
+    expect(screen.getByTestId('error')).toHaveTextContent(mockError.message);
   });
 
   it('cleans up auth listener on unmount', () => {

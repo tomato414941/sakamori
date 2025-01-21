@@ -38,7 +38,7 @@ describe('useAuth', () => {
       wrapper: AuthProvider,
     });
 
-    // 非同期処理の完了を待つ
+    // Wait for async operations to complete
     await act(async () => {
       await Promise.resolve();
     });
@@ -75,8 +75,10 @@ describe('useAuth', () => {
     await act(async () => {
       await result.current.signIn('test@example.com', 'password');
     });
-
-    expect(firebaseAuth.signInWithEmailAndPassword).toHaveBeenCalledTimes(1);
+    // Wait for async operations to complete
+    await waitFor(() => {
+      expect(firebaseAuth.signInWithEmailAndPassword).toHaveBeenCalledTimes(1);
+    });
 
     await act(async () => {
       await result.current.signUp('test@example.com', 'password');
@@ -87,8 +89,10 @@ describe('useAuth', () => {
     await act(async () => {
       await result.current.signOut();
     });
-
-    expect(firebaseAuth.signOut).toHaveBeenCalledTimes(1);
+    // Wait for async operations to complete
+    await waitFor(() => {
+      expect(firebaseAuth.signOut).toHaveBeenCalledTimes(1);
+    });
 
     await act(async () => {
       await result.current.resetPassword('test@example.com');
@@ -102,7 +106,7 @@ describe('useAuth', () => {
       wrapper: AuthProvider,
     });
 
-    // 非同期処理の完了を待つ
+    // Wait for async operations to complete
     await act(async () => {
       await Promise.resolve();
     });
