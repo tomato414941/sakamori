@@ -36,3 +36,56 @@ The component handles the following error cases:
 - Email must be a valid email format
 - Password field cannot be empty
 - Shows inline validation messages
+
+## Testing
+
+### Unit Tests
+Located in `src/components/auth/__tests__/SignInForm.test.tsx`
+
+```typescript
+describe('SignInForm', () => {
+  it('renders all form fields correctly', () => {
+    render(<SignInForm />);
+    expect(screen.getByLabelText(/email/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/password/i)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /sign in/i })).toBeInTheDocument();
+  });
+
+  it('validates form inputs', async () => {
+    render(<SignInForm />);
+    const submitButton = screen.getByRole('button', { name: /sign in/i });
+    
+    // Test empty fields
+    fireEvent.click(submitButton);
+    expect(await screen.findByText(/email is required/i)).toBeInTheDocument();
+    
+    // Test invalid email
+    fireEvent.change(screen.getByLabelText(/email/i), {
+      target: { value: 'invalid-email' },
+    });
+    expect(await screen.findByText(/invalid email format/i)).toBeInTheDocument();
+  });
+
+  it('handles successful sign in', async () => {
+    render(<SignInForm />);
+    // Fill form and submit
+    await userEvent.type(screen.getByLabelText(/email/i), 'test@example.com');
+    await userEvent.type(screen.getByLabelText(/password/i), 'password123');
+    await userEvent.click(screen.getByRole('button', { name: /sign in/i }));
+    
+    // Verify success handling
+  });
+
+  it('handles sign in errors', async () => {
+    render(<SignInForm />);
+    // Test various error scenarios
+  });
+});
+
+### Test Coverage
+- Form rendering
+- Input validation
+- Error handling
+- Success scenarios
+- Loading states
+- Integration with AuthProvider

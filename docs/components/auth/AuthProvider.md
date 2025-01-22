@@ -84,21 +84,54 @@ The component handles various authentication errors:
 
 ## Testing
 
-Tests are located in `src/components/auth/__tests__/AuthProvider.test.tsx` and cover:
+### Unit Tests
+Located in `src/components/auth/__tests__/AuthProvider.test.tsx`
 
-1. State Management
-   - Initial loading state
-   - Authentication state updates
-   - Error state handling
+```typescript
+describe('AuthProvider', () => {
+  it('provides authentication context to children', () => {
+    render(
+      <AuthProvider>
+        <TestComponent />
+      </AuthProvider>
+    );
+    // Test context values are provided correctly
+  });
 
-2. Authentication Actions
-   - Sign in success/failure
-   - Sign up success/failure
-   - Sign out functionality
+  it('handles sign in', async () => {
+    render(
+      <AuthProvider>
+        <TestComponent />
+      </AuthProvider>
+    );
+    // Test sign in functionality
+  });
 
-3. Context Provision
-   - Context accessibility
-   - Hook functionality
+  it('handles sign out', async () => {
+    render(
+      <AuthProvider>
+        <TestComponent />
+      </AuthProvider>
+    );
+    // Test sign out functionality
+  });
+
+  it('handles errors appropriately', async () => {
+    render(
+      <AuthProvider>
+        <TestComponent />
+      </AuthProvider>
+    );
+    // Test error handling
+  });
+});
+
+### Test Coverage
+- Authentication state management
+- Sign in/out functionality
+- Error handling
+- Loading states
+- Context value updates
 
 ## Security Considerations
 
