@@ -29,9 +29,9 @@ interface AuthContextType extends AuthState {
 
 ### Usage
 
-### Using Authentication State
+#### Root Application Setup
 ```tsx
-// アプリケーションのルートで使用
+// Use in application root
 import { AuthProvider } from '@/components/auth/AuthProvider';
 
 function App() {
@@ -41,16 +41,19 @@ function App() {
     </AuthProvider>
   );
 }
+```
 
-// 子コンポーネントでの使用
+#### Using in Components
+```tsx
+// Use in child components
 import { useAuth } from '@/hooks/useAuth';
 
 function ProtectedComponent() {
   const { user, loading, error, signOut } = useAuth();
 
   if (loading) return <LoadingSpinner />;
-  if (error) return <ErrorMessage message={error.message} />;
-  if (!user) return <Navigate to="/login" />;
+  if (error) return <ErrorMessage error={error} />;
+  if (!user) return <SignInPrompt />;
 
   return (
     <div>
@@ -63,102 +66,50 @@ function ProtectedComponent() {
 
 ## Error Handling
 
-### Types of Errors
-1. **Authentication Errors**
-   - Invalid authentication credentials
-   - Non-existent account
-   - Password mismatch
+The component handles various authentication errors:
 
-2. **Network Errors**
-   - Connection errors
-   - Timeouts
+1. Sign In Errors
+   - Invalid email/password
+   - User not found
+   - Too many attempts
 
-3. **Other Errors**
-   - Unexpected errors
-   - Firebase service errors
+2. Sign Up Errors
+   - Email already in use
+   - Weak password
+   - Invalid email format
 
-### Error Handling Implementation
-```typescript
-try {
-  setState(prev => ({ ...prev, loading: true, error: null }));
-  await authAction();
-} catch (error) {
-  setState(prev => ({
-    ...prev,
-    error: error instanceof Error ? error : new Error('An unknown error occurred')
-  }));
-} finally {
-  setState(prev => ({ ...prev, loading: false }));
-}
-```
+3. Network Errors
+   - Connection timeout
+   - Server unreachable
 
 ## Testing
 
-### Test Cases
-1. **Initial State**
-   - Proper initial values
-   - Loading state verification
+Tests are located in `src/components/auth/__tests__/AuthProvider.test.tsx` and cover:
 
-2. **Authentication Flow**
-   - Successful sign-in/sign-out
-   - Password reset
+1. State Management
+   - Initial loading state
+   - Authentication state updates
+   - Error state handling
 
-3. **Error Handling**
-   - Proper error handling
-   - Error message display
-   - State recovery
+2. Authentication Actions
+   - Sign in success/failure
+   - Sign up success/failure
+   - Sign out functionality
 
-### Test Example
-```typescript
-describe('AuthProvider', () => {
-  it('provides initial auth state', async () => {
-    render(
-      <AuthProvider>
-        <TestComponent />
-      </AuthProvider>
-    );
-
-    expect(screen.getByTestId('loading')).toHaveTextContent('true');
-    await waitFor(() => {
-      expect(screen.getByTestId('user')).toHaveTextContent('logged out');
-    });
-  });
-
-  it('handles auth errors', async () => {
-    render(
-      <AuthProvider>
-        <TestComponent />
-      </AuthProvider>
-    );
-
-    await act(async () => {
-      await userEvent.click(screen.getByText('Sign In'));
-    });
-
-    expect(screen.getByTestId('error')).toHaveTextContent('Auth error');
-  });
-});
-```
-
-## Performance Considerations
-
-### Memoization
-- Optimized state updates
-- Prevention of unnecessary re-renders
-- Context splitting consideration
-
-### Cleanup
-- Proper listener removal
-- Prevention of memory leaks
-- State reset
+3. Context Provision
+   - Context accessibility
+   - Hook functionality
 
 ## Security Considerations
-1. Authentication state protection
-2. Session management
-3. Proper error message display
 
-## Future Improvements
-- [ ] Implement refresh tokens
-- [ ] Manage session timeouts
-- [ ] Support multi-factor authentication
-- [ ] Integrate social login
+1. State Protection
+   - User state is cleared on sign out
+   - Sensitive data is not persisted
+
+2. Error Messages
+   - Generic error messages for security
+   - Detailed logging for debugging
+
+3. Session Management
+   - Automatic session refresh
+   - Secure session persistence

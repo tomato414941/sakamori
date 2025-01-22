@@ -1,17 +1,11 @@
-# Authentication
+# Authentication Implementation
 
 ## Overview
-SAKAMORI's authentication system is implemented using Firebase Authentication. This document explains the implementation details and usage of the authentication features.
-
-## Features
-- Email/Password Sign-in
-- New User Registration
-- Sign-out
-- Password Reset
+This document details the technical implementation of SAKAMORI's authentication system. For a high-level overview, see [auth.md](../auth.md).
 
 ## Implementation Structure
 
-### Component Structure
+### Directory Structure
 ```
 src/
 ├── components/
@@ -23,125 +17,146 @@ src/
     └── useAuth.ts               # Authentication hook
 ```
 
-### AuthProvider
-Authentication state is managed and authentication information is shared throughout the application using this context provider.
+### Firebase Configuration
 
-#### Usage
-```tsx
-// _app.tsx
-import { AuthProvider } from '@/components/auth/AuthProvider';
+```typescript
+// src/lib/firebase.ts
+import { initializeApp } from 'firebase/app';
+import { getAuth } from 'firebase/auth';
 
-function MyApp({ Component, pageProps }) {
-  return (
-    <AuthProvider>
-      <Component {...pageProps} />
-    </AuthProvider>
-  );
+const firebaseConfig = {
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+};
+
+export const app = initializeApp(firebaseConfig);
+export const auth = getAuth(app);
+```
+
+### Authentication Hook Implementation
+
+```typescript
+// src/hooks/useAuth.ts
+import { useContext } from 'react';
+import { AuthContext } from '@/components/auth/AuthProvider';
+
+export function useAuth() {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuth must be used within AuthProvider');
+  }
+  return context;
 }
 ```
 
-#### Provided Features
-- `user`: Current user information
-- `loading`: Authentication loading state
-- `error`: Authentication error information
-- `signIn`: Sign-in function
-- `signUp`: Sign-up function
-- `signOut`: Sign-out function
-- `resetPassword`: Password reset function
+### Protected Route Implementation
 
-### useAuth Hook
-A custom hook to easily use AuthProvider's features.
+```typescript
+// src/middleware.ts
+import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
 
-#### Usage
-```tsx
-import { useAuth } from '@/hooks/useAuth';
+export function middleware(request: NextRequest) {
+  // Get the user's session
+  const session = request.cookies.get('session');
 
-function MyComponent() {
-  const { user, signIn, error } = useAuth();
+  // Check auth condition
+  if (!session) {
+    // Redirect to login if user is not authenticated
+    return NextResponse.redirect(new URL('/signin', request.url));
+  }
 
-  const handleSignIn = async () => {
-    try {
-      await signIn('user@example.com', 'password');
-    } catch (error) {
-      console.error('Sign-in failed:', error);
-    }
-  };
-
-  return (
-    <div>
-      {user ? (
-        <p>Welcome, {user.email}</p>
-      ) : (
-        <button onClick={handleSignIn}>Sign-in</button>
-      )}
-      {error && <p>Error: {error.message}</p>}
-    </div>
-  );
+  return NextResponse.next();
 }
+
+export const config = {
+  matcher: ['/dashboard/:path*', '/inventory/:path*']
+};
+```
+
+## Testing Strategy
+
+### Unit Tests
+Located in `__tests__` directories alongside the components:
+
+```typescript
+// src/components/auth/__tests__/SignInForm.test.tsx
+describe('SignInForm', () => {
+  it('handles successful sign in', async () => {
+    render(<SignInForm />);
+    
+    await userEvent.type(screen.getByLabelText(/email/i), 'test@example.com');
+    await userEvent.type(screen.getByLabelText(/password/i), 'password123');
+    await userEvent.click(screen.getByRole('button', { name: /sign in/i }));
+    
+    expect(mockSignIn).toHaveBeenCalledWith('test@example.com', 'password123');
+  });
+});
+```
+
+### Integration Tests
+Located in `cypress/integration/auth`:
+
+```typescript
+// cypress/integration/auth/authentication.spec.ts
+describe('Authentication Flow', () => {
+  it('allows user to sign in and access protected routes', () => {
+    cy.visit('/signin');
+    cy.get('[data-testid="email-input"]').type('test@example.com');
+    cy.get('[data-testid="password-input"]').type('password123');
+    cy.get('[data-testid="signin-button"]').click();
+    cy.url().should('include', '/dashboard');
+  });
+});
 ```
 
 ## Error Handling
-The authentication feature properly handles the following errors:
 
-### Expected Errors
-1. Sign-in failure
-   - Invalid email/password
-   - Non-existent account
-2. Sign-up failure
-   - Email already in use
-   - Password requirements not met
-3. Password reset failure
-   - Non-existent email
-   - Email sending failure
-
-### Error Handling Implementation
-```tsx
-try {
-  await signIn(email, password);
-} catch (error) {
-  // Error is automatically saved in AuthProvider's state
-  // error.message can be used to get the error message
+### Common Error Cases
+```typescript
+export async function handleAuthError(error: FirebaseError) {
+  switch (error.code) {
+    case 'auth/user-not-found':
+      return 'No user found with this email';
+    case 'auth/wrong-password':
+      return 'Invalid password';
+    case 'auth/email-already-in-use':
+      return 'Email already registered';
+    default:
+      return 'An unexpected error occurred';
+  }
 }
 ```
 
-## Testing
-The authentication feature is thoroughly tested using Jest + React Testing Library.
+## Security Best Practices
 
-### Test Scope
-1. Authentication state management
-   - Initial state verification
-   - State change verification
-2. Error handling
-   - Verification of various error cases
-   - Error message display
-3. User interaction
-   - Form input processing
-   - Button click processing
-
-### Running Tests
-```bash
-# Run all tests
-npm test
-
-# Run only authentication-related tests
-npm test auth
+### Environment Variables
+```env
+# .env.local
+NEXT_PUBLIC_FIREBASE_API_KEY=your_api_key
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your_auth_domain
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=your_project_id
 ```
 
-## Security Considerations
-1. Password requirements
-   - Minimum 8 characters
-   - At least one uppercase letter
-   - At least one number
-2. Rate limiting
-   - Sign-in attempt limit
-   - Password reset email sending limit
+### CSRF Protection
+```typescript
+// src/middleware.ts
+import { csrf } from '@/lib/csrf';
 
-3. Session management
-   - Automatic sign-out (not implemented)
-   - Device management (not implemented)
+export async function middleware(request: NextRequest) {
+  // Verify CSRF token for mutation requests
+  if (request.method !== 'GET') {
+    const csrfToken = request.headers.get('X-CSRF-Token');
+    if (!await csrf.verify(csrfToken)) {
+      return new Response('Invalid CSRF token', { status: 403 });
+    }
+  }
+  return NextResponse.next();
+}
+```
 
-## Future Enhancements
-- [ ] Social login addition
-- [ ] Two-factor authentication implementation
-- [ ] Session management strengthening
-- [ ] User profile expansion
+## Related Documentation
+- [Authentication Overview](../auth.md)
+- [AuthProvider Component](../components/AuthProvider.md)
+- [Firebase Authentication Documentation](https://firebase.google.com/docs/auth)
