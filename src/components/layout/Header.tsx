@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useAuth } from '@/hooks/useAuth';
 
 export default function Header() {
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
 
   return (
     <header className="bg-white shadow">
@@ -21,19 +21,19 @@ export default function Header() {
                 href="/dashboard"
                 className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
               >
-                Dashboard
+                ダッシュボード
               </Link>
               <Link
                 href="/inventory"
                 className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
               >
-                Inventory
+                在庫管理
               </Link>
               <Link
                 href="/licenses"
                 className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
               >
-                Licenses
+                免許管理
               </Link>
             </nav>
           </div>
@@ -41,19 +41,19 @@ export default function Header() {
             {user ? (
               <div className="flex items-center space-x-4">
                 <span className="text-sm text-gray-700">{user.email}</span>
-                <Link
-                  href="/signout"
+                <button
+                  onClick={signOut}
                   className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                 >
-                  Sign out
-                </Link>
+                  サインアウト
+                </button>
               </div>
             ) : (
               <Link
                 href="/signin"
                 className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
               >
-                Sign in
+                サインイン
               </Link>
             )}
           </div>

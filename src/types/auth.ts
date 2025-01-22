@@ -11,6 +11,8 @@ export interface AuthContextType extends AuthState {
   signUp: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
+  user: User | null;
+  loading: boolean;
 }
 
 export interface AuthProviderProps {

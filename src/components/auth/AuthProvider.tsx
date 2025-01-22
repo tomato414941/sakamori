@@ -66,15 +66,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const signOut = async () => {
     try {
-      setState((prev) => ({ ...prev, loading: true, error: null }));
-      await firebaseSignOut(auth);
+      await auth.signOut();
     } catch (error) {
-      setState((prev) => ({
-        ...prev,
-        error: error instanceof Error ? error : new Error('An unknown error occurred'),
-      }));
-    } finally {
-      setState((prev) => ({ ...prev, loading: false }));
+      console.error('Error signing out:', error);
+      throw error;
     }
   };
 
@@ -93,11 +88,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
   };
 
   const value = {
-    ...state,
+    user: state.user,
+    loading: state.loading,
     signIn,
     signUp,
     signOut,
     resetPassword,
+    auth,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
