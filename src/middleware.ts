@@ -17,7 +17,9 @@ export function middleware(request: NextRequest) {
 
   // 未認証の場合はサインインページにリダイレクト
   if (!session) {
-    return NextResponse.redirect(new URL('/signin', request.url));
+    const url = request.nextUrl.clone();
+    url.pathname = '/signin';
+    return NextResponse.redirect(url);
   }
 
   return NextResponse.next();
