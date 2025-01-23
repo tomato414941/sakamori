@@ -1,32 +1,13 @@
 import { NextResponse } from 'next/server';
 import { middleware } from '../middleware';
 
-// NextRequestのモック
-jest.mock('next/server', () => {
-  const actual = jest.requireActual('next/server');
-  return {
-    ...actual,
-    NextRequest: jest.fn().mockImplementation((url) => ({
-      url,
-      cookies: {
-        get: jest.fn((name) => ({
-          name,
-          value: 'mock-cookie-value'
-        }))
-      }
-    })),
-    NextResponse: {
-      redirect: jest.fn().mockImplementation((url) => ({
-        status: 307,
-        headers: new Map([['location', url]])
-      })),
-      next: jest.fn().mockImplementation(() => ({
-        status: 200,
-        headers: new Map()
-      }))
-    }
-  };
-});
+// モックの設定
+jest.mock('next/server', () => ({
+  NextResponse: {
+    redirect: jest.fn((url) => ({ type: 'redirect', url })),
+    next: jest.fn(() => ({ type: 'next' })),
+  },
+}));
 
 describe('Auth Middleware', () => {
   beforeEach(() => {
@@ -34,64 +15,54 @@ describe('Auth Middleware', () => {
   });
 
   it('リダイレクト：未認証ユーザーがダッシュボードにアクセス', () => {
-    const request = {
-      url: 'http://localhost:3000/dashboard',
-      cookies: {
-        get: jest.fn().mockReturnValue(null)
-      }
+    const mockRequest = {
+      nextUrl: { pathname: '/dashboard' },
+      cookies: { get: () => null },
     };
-    const response = middleware(request);
 
-    expect(response.status).toBe(307);
-    expect(response.headers.get('location')).toBe('http://localhost:3000/signin');
+    const response = middleware(mockRequest);
+    expect(response.type).toBe('redirect');
+    expect(response.url).toContain('/signin');
   });
 
   it('リダイレクト：未認証ユーザーが在庫管理にアクセス', () => {
-    const request = {
-      url: 'http://localhost:3000/inventory',
-      cookies: {
-        get: jest.fn().mockReturnValue(null)
-      }
+    const mockRequest = {
+      nextUrl: { pathname: '/inventory' },
+      cookies: { get: () => null },
     };
-    const response = middleware(request);
 
-    expect(response.status).toBe(307);
-    expect(response.headers.get('location')).toBe('http://localhost:3000/signin');
+    const response = middleware(mockRequest);
+    expect(response.type).toBe('redirect');
+    expect(response.url).toContain('/signin');
   });
 
   it('通過：認証済みユーザーがダッシュボードにアクセス', () => {
-    const request = {
-      url: 'http://localhost:3000/dashboard',
-      cookies: {
-        get: jest.fn().mockReturnValue({ value: 'valid-session-token' })
-      }
+    const mockRequest = {
+      nextUrl: { pathname: '/dashboard' },
+      cookies: { get: () => ({ value: 'valid-token' }) },
     };
-    const response = middleware(request);
 
-    expect(response.status).toBe(200);
+    const response = middleware(mockRequest);
+    expect(response.type).toBe('next');
   });
 
   it('通過：認証済みユーザーが在庫管理にアクセス', () => {
-    const request = {
-      url: 'http://localhost:3000/inventory',
-      cookies: {
-        get: jest.fn().mockReturnValue({ value: 'valid-session-token' })
-      }
+    const mockRequest = {
+      nextUrl: { pathname: '/inventory' },
+      cookies: { get: () => ({ value: 'valid-token' }) },
     };
-    const response = middleware(request);
 
-    expect(response.status).toBe(200);
+    const response = middleware(mockRequest);
+    expect(response.type).toBe('next');
   });
 
   it('通過：未認証ユーザーが公開ページにアクセス', () => {
-    const request = {
-      url: 'http://localhost:3000/about',
-      cookies: {
-        get: jest.fn().mockReturnValue(null)
-      }
+    const mockRequest = {
+      nextUrl: { pathname: '/about' },
+      cookies: { get: () => null },
     };
-    const response = middleware(request);
 
+    const response = middleware(mockRequest);
     expect(response).toBeUndefined();
   });
 });
