@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { middleware } from '../middleware';
 
-// モックの設定
+// Mock setup
 jest.mock('next/server', () => ({
   NextResponse: {
     redirect: jest.fn((url) => ({ type: 'redirect', url })),
@@ -9,7 +9,7 @@ jest.mock('next/server', () => ({
   },
 }));
 
-// モックリクエストの作成
+// Helper function to create mock request
 function createMockRequest(pathname: string, hasSession = false) {
   return {
     nextUrl: {
@@ -35,29 +35,29 @@ describe('Auth Middleware', () => {
     jest.clearAllMocks();
   });
 
-  it('リダイレクト：未認証ユーザーがダッシュボードにアクセス', () => {
+  it('should redirect unauthenticated user accessing dashboard', () => {
     const response = middleware(createMockRequest('/dashboard'));
     expect(response.type).toBe('redirect');
     expect(response.url.pathname).toBe('/signin');
   });
 
-  it('リダイレクト：未認証ユーザーが在庫管理にアクセス', () => {
+  it('should redirect unauthenticated user accessing inventory', () => {
     const response = middleware(createMockRequest('/inventory'));
     expect(response.type).toBe('redirect');
     expect(response.url.pathname).toBe('/signin');
   });
 
-  it('通過：認証済みユーザーがダッシュボードにアクセス', () => {
+  it('should allow authenticated user to access dashboard', () => {
     const response = middleware(createMockRequest('/dashboard', true));
     expect(response.type).toBe('next');
   });
 
-  it('通過：認証済みユーザーが在庫管理にアクセス', () => {
+  it('should allow authenticated user to access inventory', () => {
     const response = middleware(createMockRequest('/inventory', true));
     expect(response.type).toBe('next');
   });
 
-  it('通過：未認証ユーザーが公開ページにアクセス', () => {
+  it('should allow unauthenticated user to access public page', () => {
     const response = middleware(createMockRequest('/about'));
     expect(response).toBeUndefined();
   });
