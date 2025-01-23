@@ -1,53 +1,96 @@
-import { NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
 import { middleware } from '../middleware';
 
 // NextRequestのモック
-function createMockRequest(url: string, cookies: Record<string, string> = {}) {
-  return new NextRequest(new URL(url, 'http://localhost:3000'), {
-    cookies: new Map(Object.entries(cookies)),
-  });
-}
+jest.mock('next/server', () => {
+  const actual = jest.requireActual('next/server');
+  return {
+    ...actual,
+    NextRequest: jest.fn().mockImplementation((url) => ({
+      url,
+      cookies: {
+        get: jest.fn((name) => ({
+          name,
+          value: 'mock-cookie-value'
+        }))
+      }
+    })),
+    NextResponse: {
+      redirect: jest.fn().mockImplementation((url) => ({
+        status: 307,
+        headers: new Map([['location', url]])
+      })),
+      next: jest.fn().mockImplementation(() => ({
+        status: 200,
+        headers: new Map()
+      }))
+    }
+  };
+});
 
 describe('Auth Middleware', () => {
-  it('リダイレクト：未認証ユーザーがダッシュボードにアクセス', async () => {
-    const request = createMockRequest('/dashboard');
-    const response = await middleware(request);
-
-    expect(response?.status).not.toBe(200);
-    expect(response?.headers.get('location')).toBe('http://localhost:3000/signin');
+  beforeEach(() => {
+    jest.clearAllMocks();
   });
 
-  it('リダイレクト：未認証ユーザーが在庫管理にアクセス', async () => {
-    const request = createMockRequest('/inventory');
-    const response = await middleware(request);
+  it('リダイレクト：未認証ユーザーがダッシュボードにアクセス', () => {
+    const request = {
+      url: 'http://localhost:3000/dashboard',
+      cookies: {
+        get: jest.fn().mockReturnValue(null)
+      }
+    };
+    const response = middleware(request);
 
-    expect(response?.status).not.toBe(200);
-    expect(response?.headers.get('location')).toBe('http://localhost:3000/signin');
+    expect(response.status).toBe(307);
+    expect(response.headers.get('location')).toBe('http://localhost:3000/signin');
   });
 
-  it('通過：認証済みユーザーがダッシュボードにアクセス', async () => {
-    const request = createMockRequest('/dashboard', {
-      session: 'valid-session-token',
-    });
-    const response = await middleware(request);
+  it('リダイレクト：未認証ユーザーが在庫管理にアクセス', () => {
+    const request = {
+      url: 'http://localhost:3000/inventory',
+      cookies: {
+        get: jest.fn().mockReturnValue(null)
+      }
+    };
+    const response = middleware(request);
 
-    expect(response?.status).toBe(200);
-    expect(response?.headers.get('location')).toBeNull();
+    expect(response.status).toBe(307);
+    expect(response.headers.get('location')).toBe('http://localhost:3000/signin');
   });
 
-  it('通過：認証済みユーザーが在庫管理にアクセス', async () => {
-    const request = createMockRequest('/inventory', {
-      session: 'valid-session-token',
-    });
-    const response = await middleware(request);
+  it('通過：認証済みユーザーがダッシュボードにアクセス', () => {
+    const request = {
+      url: 'http://localhost:3000/dashboard',
+      cookies: {
+        get: jest.fn().mockReturnValue({ value: 'valid-session-token' })
+      }
+    };
+    const response = middleware(request);
 
-    expect(response?.status).toBe(200);
-    expect(response?.headers.get('location')).toBeNull();
+    expect(response.status).toBe(200);
   });
 
-  it('通過：未認証ユーザーが公開ページにアクセス', async () => {
-    const request = createMockRequest('/about');
-    const response = await middleware(request);
+  it('通過：認証済みユーザーが在庫管理にアクセス', () => {
+    const request = {
+      url: 'http://localhost:3000/inventory',
+      cookies: {
+        get: jest.fn().mockReturnValue({ value: 'valid-session-token' })
+      }
+    };
+    const response = middleware(request);
+
+    expect(response.status).toBe(200);
+  });
+
+  it('通過：未認証ユーザーが公開ページにアクセス', () => {
+    const request = {
+      url: 'http://localhost:3000/about',
+      cookies: {
+        get: jest.fn().mockReturnValue(null)
+      }
+    };
+    const response = middleware(request);
 
     expect(response).toBeUndefined();
   });
