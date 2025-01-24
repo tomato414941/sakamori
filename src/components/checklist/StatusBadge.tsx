@@ -40,6 +40,7 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({
     
     return (
         <span
+            data-testid="status-badge"
             className={clsx(
                 'inline-flex items-center justify-center rounded-full font-medium',
                 config.bgColor,
