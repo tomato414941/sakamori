@@ -25,12 +25,12 @@ describe('StatusBadge', () => {
         const badge = container.firstChild as HTMLElement;
         
         const sizeClasses = {
-            small: expect.stringContaining('text-xs'),
-            medium: expect.stringContaining('text-sm'),
-            large: expect.stringContaining('text-base')
+            small: 'text-xs',
+            medium: 'text-sm',
+            large: 'text-base'
         };
         
-        expect(badge.className).toMatch(sizeClasses[size]);
+        expect(badge.className).toContain(sizeClasses[size]);
     });
 
     test('applies custom className when provided', () => {

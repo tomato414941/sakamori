@@ -26,3 +26,12 @@ export interface StatusBadgeProps {
     size?: 'small' | 'medium' | 'large';
     className?: string;
 }
+
+export interface ProgressIndicatorProps {
+    completed: number;
+    total: number;
+    type?: 'circle' | 'bar';
+    size?: 'small' | 'medium' | 'large';
+    showPercentage?: boolean;
+    className?: string;
+}
