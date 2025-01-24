@@ -15,27 +15,15 @@ export function LanguageSwitcher() {
   };
 
   return (
-    <div className="flex items-center space-x-2">
-      <button
-        onClick={() => switchLanguage('ja')}
-        className={`px-2 py-1 text-sm rounded ${
-          currentLocale === 'ja'
-            ? 'bg-indigo-600 text-white'
-            : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-        }`}
-      >
-        日本語
-      </button>
-      <button
-        onClick={() => switchLanguage('en')}
-        className={`px-2 py-1 text-sm rounded ${
-          currentLocale === 'en'
-            ? 'bg-indigo-600 text-white'
-            : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-        }`}
-      >
-        English
-      </button>
-    </div>
+    <button
+      onClick={() => switchLanguage(currentLocale === 'en' ? 'ja' : 'en')}
+      className={`px-2 py-1 text-sm rounded ${
+        currentLocale === 'ja'
+          ? 'bg-indigo-600 text-white'
+          : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+      }`}
+    >
+      {currentLocale === 'ja' ? 'English' : '日本語'}
+    </button>
   );
 }
