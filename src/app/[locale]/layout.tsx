@@ -53,7 +53,7 @@ export default async function RootLayout({
       >
         <NextIntlClientProvider locale={locale} messages={messages}>
           <AuthProvider>
-            <div className="min-h-full flex flex-col">
+            <div className="min-h-full">
               {/* 言語切り替えボタンを右上に配置 */}
               <div className="fixed top-4 right-4 z-50">
                 <LanguageSwitcher />
