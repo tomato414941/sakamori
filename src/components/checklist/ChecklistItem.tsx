@@ -73,12 +73,17 @@ export const ChecklistItem: React.FC<ChecklistItemProps> = ({
                                 {expanded ? '▼' : '▶'}
                             </button>
                         )}
-                        <h3 className="text-lg font-medium">{item.title}</h3>
-                        <StatusBadge status={item.status} size="small" />
+                        <div className="flex items-center space-x-2">
+                            <StatusBadge 
+                                status={item.status} 
+                                aria-label={item.status}
+                            />
+                            <h3 className="text-lg font-medium">{item.title}</h3>
+                        </div>
+                        {item.description && (
+                            <p className="text-gray-600 mt-1">{item.description}</p>
+                        )}
                     </div>
-                    {item.description && (
-                        <p className="text-gray-600 mt-1">{item.description}</p>
-                    )}
                 </div>
                 <div className="flex items-center gap-2">
                     <button

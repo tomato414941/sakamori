@@ -27,21 +27,21 @@ describe('Header', () => {
 
     it('renders navigation links', () => {
       render(<Header />);
-      expect(screen.getByText('Dashboard')).toHaveAttribute('href', '/dashboard');
-      expect(screen.getByText('Inventory')).toHaveAttribute('href', '/inventory');
-      expect(screen.getByText('Licenses')).toHaveAttribute('href', '/licenses');
+      expect(screen.getByText('ダッシュボード')).toHaveAttribute('href', '/dashboard');
+      expect(screen.getByText('在庫管理')).toHaveAttribute('href', '/inventory');
+      expect(screen.getByText('免許管理')).toHaveAttribute('href', '/licenses');
     });
 
     it('renders sign in button when user is not authenticated', () => {
       render(<Header />);
-      const signInButton = screen.getByText('Sign in');
+      const signInButton = screen.getByText('サインイン');
       expect(signInButton).toBeInTheDocument();
       expect(signInButton).toHaveAttribute('href', '/signin');
     });
 
     it('does not render sign out button when user is not authenticated', () => {
       render(<Header />);
-      expect(screen.queryByText('Sign out')).not.toBeInTheDocument();
+      expect(screen.queryByText('サインアウト')).not.toBeInTheDocument();
     });
   });
 
@@ -61,12 +61,12 @@ describe('Header', () => {
 
     it('renders sign out button when user is authenticated', () => {
       render(<Header />);
-      expect(screen.getByText('Sign out')).toBeInTheDocument();
+      expect(screen.getByText('サインアウト')).toBeInTheDocument();
     });
 
     it('does not render sign in button when user is authenticated', () => {
       render(<Header />);
-      expect(screen.queryByText('Sign in')).not.toBeInTheDocument();
+      expect(screen.queryByText('サインイン')).not.toBeInTheDocument();
     });
   });
 

@@ -96,12 +96,12 @@ describe('SignInForm', () => {
     const form = screen.getByRole('form');
     const submitButton = screen.getByRole('button', { name: 'サインイン' });
 
-    expect(form).toHaveClass('space-y-4');
+    expect(form).toHaveClass('space-y-6');
     expect(submitButton).toHaveClass(
       'w-full',
       'flex',
       'justify-center',
-      'py-2',
+      'py-2.5',
       'px-4',
       'border',
       'border-transparent',
@@ -112,6 +112,10 @@ describe('SignInForm', () => {
       'text-white',
       'bg-indigo-600',
       'hover:bg-indigo-700',
+      'focus:outline-none',
+      'focus:ring-2',
+      'focus:ring-offset-2',
+      'focus:ring-indigo-500',
       'disabled:opacity-50'
     );
   });

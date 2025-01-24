@@ -14,13 +14,14 @@ const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({ className, size = 'medi
   };
 
   return (
-    <div className={clsx('flex items-center justify-center', className)}>
+    <div role="status" className={clsx('flex items-center justify-center', className)}>
       <div
         className={clsx(
           'animate-spin rounded-full border-2 border-gray-300 border-t-blue-600',
           sizeClasses[size]
         )}
       />
+      <span className="sr-only">読み込み中...</span>
     </div>
   );
 };

@@ -1,0 +1,60 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ユーザーが認証されているかチェック
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // リクエストユーザーが所有者かチェック
+    function isOwner(userId) {
+      return request.auth.uid == userId;
+    }
+
+    // データの基本的な検証
+    function isValidChecklistCategory() {
+      let incomingData = request.resource.data;
+      return incomingData.name is string &&
+             incomingData.name.size() > 0 &&
+             incomingData.userId is string &&
+             (!('description' in incomingData) || incomingData.description is string);
+    }
+
+    function isValidChecklistItem() {
+      let incomingData = request.resource.data;
+      return incomingData.title is string &&
+             incomingData.title.size() > 0 &&
+             incomingData.status in ['not_started', 'in_progress', 'completed', 'needs_review'] &&
+             incomingData.category is string &&
+             (!('description' in incomingData) || incomingData.description is string) &&
+             (!('subCategory' in incomingData) || incomingData.subCategory is string) &&
+             (!('requiredDocuments' in incomingData) || incomingData.requiredDocuments is list) &&
+             (!('notes' in incomingData) || incomingData.notes is list);
+    }
+
+    // チェックリストカテゴリのルール
+    match /checklistCategories/{categoryId} {
+      allow read: if isAuthenticated() && isOwner(resource.data.userId);
+      allow create: if isAuthenticated() && 
+                      isOwner(request.resource.data.userId) && 
+                      isValidChecklistCategory();
+      allow update: if isAuthenticated() && 
+                      isOwner(resource.data.userId) && 
+                      isValidChecklistCategory();
+      allow delete: if isAuthenticated() && isOwner(resource.data.userId);
+    }
+
+    // チェックリストアイテムのルール
+    match /checklistItems/{itemId} {
+      allow read: if isAuthenticated() && isOwner(resource.data.userId);
+      allow create: if isAuthenticated() && 
+                      isOwner(request.resource.data.userId) && 
+                      isValidChecklistItem();
+      allow update: if isAuthenticated() && 
+                      isOwner(resource.data.userId) && 
+                      isValidChecklistItem();
+      allow delete: if isAuthenticated() && isOwner(resource.data.userId);
+    }
+  }
+}

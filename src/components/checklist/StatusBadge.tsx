@@ -31,26 +31,47 @@ const sizeConfig = {
     large: 'text-base px-4 py-1.5'
 };
 
+const getNextStatus = (currentStatus: ChecklistStatus): ChecklistStatus => {
+    const statusOrder: ChecklistStatus[] = ['not_started', 'in_progress', 'completed', 'needs_review'];
+    const currentIndex = statusOrder.indexOf(currentStatus);
+    return statusOrder[(currentIndex + 1) % statusOrder.length];
+};
+
 export const StatusBadge: React.FC<StatusBadgeProps> = ({ 
     status, 
     size = 'medium',
-    className
+    className,
+    onClick,
+    'aria-label': ariaLabel,
+    ...props
 }) => {
     const config = statusConfig[status];
     
+    const handleClick = () => {
+        if (onClick) {
+            const nextStatus = getNextStatus(status);
+            onClick(nextStatus);
+        }
+    };
+
     return (
-        <span
+        <button
+            type="button"
+            onClick={handleClick}
+            aria-label={ariaLabel || status}
             data-testid="status-badge"
             className={clsx(
                 'inline-flex items-center justify-center rounded-full font-medium',
                 config.bgColor,
                 config.textColor,
                 sizeConfig[size],
-                className
+                className,
+                onClick && 'cursor-pointer hover:opacity-80'
             )}
+            {...props}
         >
             {config.label}
-        </span>
+        </button>
     );
 };
 

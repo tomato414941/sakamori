@@ -23,7 +23,7 @@ export function SignInForm() {
     <div className="w-full max-w-md mx-auto">
       <div className="bg-white py-8 px-10 shadow rounded-lg sm:px-12">
         <h2 className="text-2xl font-bold mb-8 text-center text-gray-900">サインイン</h2>
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} role="form" className="space-y-6">
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-gray-700">
               メールアドレス
