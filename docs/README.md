@@ -1,18 +1,30 @@
-# SAKAMORI Documentation
+# SAKAMORI Documentation / SAKAMORIドキュメント
 
 This directory contains the documentation for the SAKAMORI project.
+このディレクトリにはSAKAMORIプロジェクトのドキュメントが含まれています。
 
-## Directory Structure
+## Documentation Links / ドキュメントリンク
+
+- [English Documentation](en/README.md)
+- [日本語ドキュメント](ja/README.md)
+
+## Directory Structure / ディレクトリ構造
 
 ```
 docs/
 ├── en/                 # English documentation
-│   └── features/       # Feature documentation
-│       └── license/    # License management feature
+│   ├── components/     # Component documentation
+│   │   ├── auth/      # Authentication components
+│   │   └── layout/    # Layout components
+│   └── features/      # Feature documentation
+│       └── auth/      # Authentication feature
 ├── ja/                 # Japanese documentation
-│   └── features/       # 機能に関するドキュメント
-│       └── license/    # ライセンス管理機能
-└── README.md          # This file
+│   ├── components/     # コンポーネントのドキュメント
+│   │   ├── auth/      # 認証コンポーネント
+│   │   └── layout/    # レイアウトコンポーネント
+│   └── features/      # 機能のドキュメント
+│       └── auth/      # 認証機能
+└── README.md          # This file / このファイル
 ```
 
 ## Documentation Guidelines
