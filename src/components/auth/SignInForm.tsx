@@ -2,20 +2,36 @@
 
 import { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
+import { useRouter } from 'next/navigation';
 
 export function SignInForm() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [message, setMessage] = useState('');
   const { signIn, loading } = useAuth();
+  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      setMessage('');
       await signIn(email, password);
       setMessage('サインインに成功しました');
+      // 成功したらダッシュボードにリダイレクト
+      router.push('/dashboard');
     } catch (error: any) {
-      setMessage(`エラー: ${error.message}`);
+      console.error('Sign in error:', error);
+      if (error.code === 'auth/invalid-email') {
+        setMessage('エラー: メールアドレスの形式が正しくありません');
+      } else if (error.code === 'auth/user-not-found') {
+        setMessage('エラー: ユーザーが見つかりません');
+      } else if (error.code === 'auth/wrong-password') {
+        setMessage('エラー: パスワードが間違っています');
+      } else if (error.code === 'auth/too-many-requests') {
+        setMessage('エラー: ログイン試行回数が多すぎます。しばらく時間をおいてから再度お試しください');
+      } else {
+        setMessage(`エラー: ${error.message || '不明なエラーが発生しました'}`);
+      }
     }
   };
 

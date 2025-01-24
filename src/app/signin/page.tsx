@@ -12,6 +12,7 @@ export default function SignInPage() {
 
   useEffect(() => {
     if (user) {
+      console.log('User detected, redirecting to dashboard:', user);
       router.push('/dashboard');
     }
   }, [user, router]);

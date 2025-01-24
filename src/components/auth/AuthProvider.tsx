@@ -27,8 +27,15 @@ export function AuthProvider({ children }: AuthProviderProps) {
       auth,
       (user) => {
         setState((prev) => ({ ...prev, user, loading: false }));
+        // ユーザー状態が変更されたときの処理
+        if (user) {
+          console.log('User is signed in:', user);
+        } else {
+          console.log('User is signed out');
+        }
       },
       (error) => {
+        console.error('Auth state change error:', error);
         setState((prev) => ({ ...prev, error: error as Error, loading: false }));
       }
     );
@@ -39,12 +46,15 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const signIn = async (email: string, password: string) => {
     try {
       setState((prev) => ({ ...prev, loading: true, error: null }));
-      await signInWithEmailAndPassword(auth, email, password);
-    } catch (error) {
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      console.log('Sign in successful:', userCredential.user);
+    } catch (error: any) {
+      console.error('Sign in error:', error);
       setState((prev) => ({
         ...prev,
-        error: error instanceof Error ? error : new Error('An unknown error occurred'),
+        error: error instanceof Error ? error : new Error(error.message || 'An unknown error occurred'),
       }));
+      throw error;
     } finally {
       setState((prev) => ({ ...prev, loading: false }));
     }
@@ -53,12 +63,15 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const signUp = async (email: string, password: string) => {
     try {
       setState((prev) => ({ ...prev, loading: true, error: null }));
-      await createUserWithEmailAndPassword(auth, email, password);
-    } catch (error) {
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      console.log('Sign up successful:', userCredential.user);
+    } catch (error: any) {
+      console.error('Sign up error:', error);
       setState((prev) => ({
         ...prev,
-        error: error instanceof Error ? error : new Error('An unknown error occurred'),
+        error: error instanceof Error ? error : new Error(error.message || 'An unknown error occurred'),
       }));
+      throw error;
     } finally {
       setState((prev) => ({ ...prev, loading: false }));
     }
