@@ -5,6 +5,7 @@ import "../globals.css";
 import { AuthProvider } from "@/components/auth/AuthProvider";
 import { NextIntlClientProvider } from 'next-intl';
 import { notFound } from 'next/navigation';
+import { LanguageSwitcher } from "@/components/common/LanguageSwitcher";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -53,6 +54,10 @@ export default async function RootLayout({
         <NextIntlClientProvider locale={locale} messages={messages}>
           <AuthProvider>
             <div className="min-h-full flex flex-col">
+              {/* 言語切り替えボタンを右上に配置 */}
+              <div className="fixed top-4 right-4 z-50">
+                <LanguageSwitcher />
+              </div>
               {children}
             </div>
           </AuthProvider>
