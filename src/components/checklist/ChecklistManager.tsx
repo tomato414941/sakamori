@@ -7,6 +7,8 @@ import {
 } from '../../types/checklist';
 import ChecklistItem from './ChecklistItem';
 import ProgressIndicator from './ProgressIndicator';
+import ErrorMessage from '../common/ErrorMessage';
+import LoadingSpinner from '../common/LoadingSpinner';
 import clsx from 'clsx';
 
 export const ChecklistManager: React.FC<ChecklistManagerProps> = ({
@@ -17,12 +19,31 @@ export const ChecklistManager: React.FC<ChecklistManagerProps> = ({
     onCategoryAdd,
     onItemAdd,
     className,
+    isLoading,
+    error,
+    onRetry,
 }) => {
     const [state, setState] = useState<ChecklistState>({
         categories,
         expandedItems: new Set<string>(),
         selectedCategory: categories.length > 0 ? categories[0].id : null,
     });
+
+    if (isLoading) {
+        return (
+            <div className="min-h-[200px] flex items-center justify-center">
+                <LoadingSpinner size="large" />
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="min-h-[200px]">
+                <ErrorMessage error={error} onRetry={onRetry} />
+            </div>
+        );
+    }
 
     // カテゴリー選択の処理
     const handleCategorySelect = useCallback((categoryId: string) => {

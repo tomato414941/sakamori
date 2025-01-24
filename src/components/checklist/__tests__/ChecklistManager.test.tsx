@@ -147,4 +147,67 @@ describe('ChecklistManager', () => {
             category: 'カテゴリー1',
         });
     });
+
+    // ローディング状態のテスト
+    it('displays loading spinner when isLoading is true', () => {
+        render(<ChecklistManager categories={[]} isLoading={true} />);
+        
+        expect(screen.getByRole('status')).toBeInTheDocument();
+        expect(screen.queryByText('カテゴリー1')).not.toBeInTheDocument();
+    });
+
+    // エラー状態のテスト
+    it('displays error message when error occurs', () => {
+        const error = new Error('テストエラー');
+        const onRetry = jest.fn();
+        
+        render(
+            <ChecklistManager 
+                categories={[]} 
+                error={error} 
+                onRetry={onRetry}
+            />
+        );
+        
+        expect(screen.getByText('エラーが発生しました')).toBeInTheDocument();
+        expect(screen.getByText('テストエラー')).toBeInTheDocument();
+        
+        // 再試行ボタンのテスト
+        const retryButton = screen.getByRole('button', { name: '再試行' });
+        retryButton.click();
+        expect(onRetry).toHaveBeenCalledTimes(1);
+    });
+
+    // エラーからの回復のテスト
+    it('recovers from error state when error is cleared', () => {
+        const { rerender } = render(
+            <ChecklistManager 
+                categories={[]} 
+                error={new Error('テストエラー')} 
+            />
+        );
+        
+        expect(screen.getByText('エラーが発生しました')).toBeInTheDocument();
+        
+        // エラーがクリアされた状態で再レンダリング
+        rerender(<ChecklistManager categories={mockCategories} error={null} />);
+        
+        expect(screen.queryByText('エラーが発生しました')).not.toBeInTheDocument();
+        expect(screen.getByText('カテゴリー1')).toBeInTheDocument();
+    });
+
+    // ローディングからデータ表示への遷移テスト
+    it('transitions from loading to data display', () => {
+        const { rerender } = render(
+            <ChecklistManager categories={[]} isLoading={true} />
+        );
+        
+        expect(screen.getByRole('status')).toBeInTheDocument();
+        
+        // データロード完了後の状態
+        rerender(<ChecklistManager categories={mockCategories} isLoading={false} />);
+        
+        expect(screen.queryByRole('status')).not.toBeInTheDocument();
+        expect(screen.getByText('カテゴリー1')).toBeInTheDocument();
+    });
 });

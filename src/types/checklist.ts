@@ -56,6 +56,9 @@ export interface ChecklistManagerProps {
     onCategoryAdd?: (name: string, description?: string) => void;
     onItemAdd?: (categoryId: string, item: Omit<ChecklistItem, 'id' | 'updatedAt'>) => void;
     className?: string;
+    isLoading?: boolean;
+    error?: Error | null;
+    onRetry?: () => void;
 }
 
 export interface ChecklistState {
