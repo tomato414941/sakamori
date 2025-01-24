@@ -105,6 +105,7 @@ describe('SignUpForm', () => {
     expect(screen.getByText(/strong password/i)).toBeInTheDocument();
   });
 });
+```
 
 ### Test Coverage
 - Form rendering

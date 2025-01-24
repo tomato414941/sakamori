@@ -81,6 +81,7 @@ describe('SignInForm', () => {
     // Test various error scenarios
   });
 });
+```
 
 ### Test Coverage
 - Form rendering

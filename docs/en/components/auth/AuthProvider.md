@@ -125,6 +125,7 @@ describe('AuthProvider', () => {
     // Test error handling
   });
 });
+```
 
 ### Test Coverage
 - Authentication state management
