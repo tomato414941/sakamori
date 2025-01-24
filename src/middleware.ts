@@ -1,46 +1,39 @@
 import createMiddleware from 'next-intl/middleware';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+import { locales } from '../i18n';
 
-// 言語設定のミドルウェア
+// next-intlミドルウェアを作成
 const intlMiddleware = createMiddleware({
-  locales: ['en', 'ja'],
+  // デフォルト言語を設定
   defaultLocale: 'ja',
+  // サポートする言語を設定
+  locales,
+  // 言語設定を記憶
+  localePrefix: 'as-needed'
 });
 
-export function middleware(request: NextRequest) {
-  // 保護されたルートかどうかを確認
-  const isProtectedRoute = 
-    request.nextUrl.pathname.startsWith('/dashboard') ||
-    request.nextUrl.pathname.startsWith('/inventory');
+export default async function middleware(request: NextRequest) {
+  // 保護されたルートのパターン
+  const protectedRoutes = ['/dashboard'];
+  const pathname = request.nextUrl.pathname;
 
-  // 保護されていないルートはスキップ
-  if (!isProtectedRoute) {
-    return;
+  // next-intlミドルウェアを適用
+  const response = intlMiddleware(request);
+
+  // 保護されたルートへのアクセスをチェック
+  if (protectedRoutes.some(route => pathname.startsWith(route))) {
+    const token = request.cookies.get('session');
+    if (!token) {
+      const url = new URL('/signin', request.url);
+      return NextResponse.redirect(url);
+    }
   }
 
-  // セッションの確認
-  const session = request.cookies.get('session');
-
-  // 未認証の場合はサインインページにリダイレクト
-  if (!session) {
-    const url = request.nextUrl.clone();
-    url.pathname = '/signin';
-    return NextResponse.redirect(url);
-  }
-
-  // 言語設定のミドルウェアを適用
-  return intlMiddleware(request);
+  return response;
 }
 
-// 保護するルートを指定
+// ミドルウェアを適用するパスを設定
 export const config = {
-  matcher: [
-    // ダッシュボード関連のルート
-    '/dashboard/:path*',
-    // 在庫管理関連のルート
-    '/inventory/:path*',
-    // next-intlミドルウェアを適用するパス
-    '/((?!api|_next|.*\\..*).*)'
-  ]
+  matcher: ['/((?!api|_next|.*\\..*).*)']
 };
