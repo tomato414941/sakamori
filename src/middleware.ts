@@ -1,39 +1,44 @@
-import createMiddleware from 'next-intl/middleware';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { locales } from '../i18n';
+import { defaultLocale, locales } from './locales';
 
-// next-intlミドルウェアを作成
-const intlMiddleware = createMiddleware({
-  // デフォルト言語を設定
-  defaultLocale: 'ja',
-  // サポートする言語を設定
-  locales,
-  // 言語設定を記憶
-  localePrefix: 'as-needed'
-});
+export function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl;
 
-export default async function middleware(request: NextRequest) {
-  // 保護されたルートのパターン
-  const protectedRoutes = ['/dashboard'];
-  const pathname = request.nextUrl.pathname;
-
-  // next-intlミドルウェアを適用
-  const response = intlMiddleware(request);
-
-  // 保護されたルートへのアクセスをチェック
-  if (protectedRoutes.some(route => pathname.startsWith(route))) {
-    const token = request.cookies.get('session');
-    if (!token) {
-      const url = new URL('/signin', request.url);
-      return NextResponse.redirect(url);
-    }
+  // /から始まるパスのみを処理
+  if (!pathname.startsWith('/')) {
+    return NextResponse.next();
   }
 
-  return response;
+  // 静的ファイルは無視
+  if (
+    pathname.includes('.') ||
+    pathname.startsWith('/_next') ||
+    pathname.startsWith('/api')
+  ) {
+    return NextResponse.next();
+  }
+
+  // パスからロケールを取得
+  const pathnameLocale = pathname.split('/')[1] as string;
+
+  // ロケールが指定されていない場合はデフォルトロケールにリダイレクト
+  if (!pathnameLocale) {
+    const url = request.nextUrl.clone();
+    url.pathname = `/${defaultLocale}${pathname}`;
+    return NextResponse.redirect(url);
+  }
+
+  // 無効なロケールの場合はデフォルトロケールにリダイレクト
+  if (!locales.includes(pathnameLocale as any)) {
+    const url = request.nextUrl.clone();
+    url.pathname = `/${defaultLocale}${pathname.substring(pathnameLocale.length + 1)}`;
+    return NextResponse.redirect(url);
+  }
+
+  return NextResponse.next();
 }
 
-// ミドルウェアを適用するパスを設定
 export const config = {
-  matcher: ['/((?!api|_next|.*\\..*).*)']
+  matcher: ['/((?!api|_next|.*\\..*).*)'],
 };

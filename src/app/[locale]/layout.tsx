@@ -3,9 +3,10 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { Inter } from 'next/font/google';
 import "../globals.css";
 import { AuthProvider } from "@/components/auth/AuthProvider";
-import { NextIntlClientProvider } from 'next-intl';
 import { notFound } from 'next/navigation';
 import { LanguageSwitcher } from "@/components/common/LanguageSwitcher";
+import { locales, Locale } from "@/locales";
+import { LocaleProvider } from "@/hooks/useLocale";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -26,42 +27,33 @@ export const metadata: Metadata = {
 
 // サポートする言語を定義
 export function generateStaticParams() {
-  return [{ locale: 'en' }, { locale: 'ja' }];
+  return locales.map((locale) => ({ locale }));
 }
 
-async function getMessages(locale: string) {
-  try {
-    return (await import(`../../../messages/${locale}.json`)).default;
-  } catch (error) {
+type Props = {
+  children: React.ReactNode;
+  params: Promise<{ locale: string }>;
+};
+
+export default async function RootLayout(props: Props) {
+  const { locale } = await props.params;
+
+  // サポートされていない言語の場合は404
+  if (!locales.includes(locale as Locale)) {
     notFound();
   }
-}
-
-export default async function RootLayout({
-  children,
-  params: { locale }
-}: Readonly<{
-  children: React.ReactNode;
-  params: { locale: string };
-}>) {
-  const messages = await getMessages(locale);
 
   return (
     <html lang={locale} className="h-full">
-      <head />
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} ${inter.className} antialiased h-full`}
-      >
-        <NextIntlClientProvider locale={locale} messages={messages}>
+      <body className={`${geistSans.variable} ${geistMono.variable} ${inter.className} antialiased h-full`}>
+        <LocaleProvider initialLocale={locale as Locale}>
           <AuthProvider>
-            <div className="min-h-full">
-              <div className="fixed top-4 right-4 z-50">
-                <LanguageSwitcher />
-              </div>
-              {children}
+            <div className="flex min-h-screen flex-col bg-gray-50">
+              <LanguageSwitcher />
+              {props.children}
             </div>
           </AuthProvider>
-        </NextIntlClientProvider>
+        </LocaleProvider>
       </body>
     </html>
   );
