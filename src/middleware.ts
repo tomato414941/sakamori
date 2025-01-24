@@ -1,5 +1,12 @@
+import createMiddleware from 'next-intl/middleware';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+
+// 言語設定のミドルウェア
+const intlMiddleware = createMiddleware({
+  locales: ['en', 'ja'],
+  defaultLocale: 'ja',
+});
 
 export function middleware(request: NextRequest) {
   // 保護されたルートかどうかを確認
@@ -22,7 +29,8 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  return NextResponse.next();
+  // 言語設定のミドルウェアを適用
+  return intlMiddleware(request);
 }
 
 // 保護するルートを指定
@@ -32,5 +40,7 @@ export const config = {
     '/dashboard/:path*',
     // 在庫管理関連のルート
     '/inventory/:path*',
+    // next-intlミドルウェアを適用するパス
+    '/((?!api|_next|.*\\..*).*)'
   ]
 };

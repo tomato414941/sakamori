@@ -1,0 +1,38 @@
+{
+  "common": {
+    "appName": "SAKAMORI",
+    "description": "Integrated Management System for Liquor Retailers",
+    "loading": "Loading...",
+    "error": "An error occurred"
+  },
+  "auth": {
+    "signIn": "Sign In",
+    "signUp": "Sign Up",
+    "signOut": "Sign Out",
+    "email": "Email",
+    "password": "Password",
+    "forgotPassword": "Forgot your password?",
+    "noAccount": "Don't have an account?",
+    "success": "Successfully signed in",
+    "errors": {
+      "invalidEmail": "Invalid email format",
+      "userNotFound": "User not found",
+      "wrongPassword": "Incorrect password",
+      "tooManyRequests": "Too many login attempts. Please try again later",
+      "unknown": "An unknown error occurred"
+    }
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "welcome": "Welcome",
+    "checklist": {
+      "title": "Checklist",
+      "status": {
+        "notStarted": "Not Started",
+        "inProgress": "In Progress",
+        "completed": "Completed",
+        "needsReview": "Needs Review"
+      }
+    }
+  }
+}
