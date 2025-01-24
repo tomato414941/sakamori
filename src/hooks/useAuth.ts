@@ -1,32 +1,37 @@
 import { useContext } from 'react';
+import { useRouter, useParams } from 'next/navigation';
 import { AuthContext } from '@/components/auth/AuthProvider';
 import { AuthContextType } from '@/types/auth';
-import { useRouter } from 'next/navigation';
 
 export const useAuth = (): AuthContextType => {
   const context = useContext(AuthContext);
   const router = useRouter();
+  const params = useParams();
+  const locale = params?.locale as string || 'ja';
   
   if (!context) {
     throw new Error('useAuth must be used within an AuthProvider');
   }
   
-  const { user, loading, signIn, signUp, auth } = context;
+  const { user, loading, error, signIn, signUp, resetPassword, signOut: contextSignOut } = context;
   
   const signOut = async () => {
     try {
-      await auth.signOut();
-      router.push('/signin');
+      await contextSignOut();
+      router.push(`/${locale}/signin`);
     } catch (error) {
       console.error('Error signing out:', error);
+      throw error;
     }
   };
 
   return {
     user,
     loading,
+    error,
     signIn,
     signUp,
     signOut,
+    resetPassword,
   };
 };

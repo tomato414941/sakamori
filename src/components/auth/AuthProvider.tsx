@@ -7,6 +7,7 @@ import {
   signOut as firebaseSignOut,
   onAuthStateChanged,
   sendPasswordResetEmail,
+  User,
 } from 'firebase/auth';
 import { auth } from '@/lib/firebase/config';
 import { AuthContextType, AuthProviderProps, AuthState } from '@/types/auth';
@@ -26,13 +27,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     const unsubscribe = onAuthStateChanged(
       auth,
       (user) => {
-        setState((prev) => ({ ...prev, user, loading: false }));
-        // ユーザー状態が変更されたときの処理
-        if (user) {
-          console.log('User is signed in:', user);
-        } else {
-          console.log('User is signed out');
-        }
+        setState((prev) => ({ ...prev, user, loading: false, error: null }));
       },
       (error) => {
         console.error('Auth state change error:', error);
@@ -43,46 +38,65 @@ export function AuthProvider({ children }: AuthProviderProps) {
     return () => unsubscribe();
   }, []);
 
+  const handleAuthError = (error: any) => {
+    console.error('Authentication error:', error);
+    let errorMessage: string;
+    
+    switch (error.code) {
+      case 'auth/user-not-found':
+      case 'auth/wrong-password':
+        errorMessage = 'auth.error.invalidCredentials';
+        break;
+      case 'auth/email-already-in-use':
+        errorMessage = 'auth.error.emailInUse';
+        break;
+      case 'auth/weak-password':
+        errorMessage = 'auth.error.weakPassword';
+        break;
+      case 'auth/invalid-email':
+        errorMessage = 'auth.error.invalidEmail';
+        break;
+      case 'auth/too-many-requests':
+        errorMessage = 'auth.error.tooManyRequests';
+        break;
+      case 'auth/network-request-failed':
+        errorMessage = 'auth.error.networkError';
+        break;
+      case 'auth/operation-not-allowed':
+        errorMessage = 'auth.error.operationNotAllowed';
+        break;
+      case 'auth/requires-recent-login':
+        errorMessage = 'auth.error.requiresRecentLogin';
+        break;
+      default:
+        console.error('Unhandled auth error:', error);
+        errorMessage = 'auth.error.unknown';
+    }
+    
+    setState((prev) => ({
+      ...prev,
+      error: { message: errorMessage, code: error.code },
+      loading: false,
+    }));
+
+    throw error;
+  };
+
   const signIn = async (email: string, password: string) => {
     try {
       setState((prev) => ({ ...prev, loading: true, error: null }));
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      console.log('Sign in successful:', userCredential.user);
+      await signInWithEmailAndPassword(auth, email, password);
     } catch (error: any) {
-      console.error('Sign in error:', error);
-      setState((prev) => ({
-        ...prev,
-        error: error instanceof Error ? error : new Error(error.message || 'An unknown error occurred'),
-      }));
-      throw error;
-    } finally {
-      setState((prev) => ({ ...prev, loading: false }));
+      handleAuthError(error);
     }
   };
 
   const signUp = async (email: string, password: string) => {
     try {
       setState((prev) => ({ ...prev, loading: true, error: null }));
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      console.log('Sign up successful:', userCredential.user);
+      await createUserWithEmailAndPassword(auth, email, password);
     } catch (error: any) {
-      console.error('Sign up error:', error);
-      setState((prev) => ({
-        ...prev,
-        error: error instanceof Error ? error : new Error(error.message || 'An unknown error occurred'),
-      }));
-      throw error;
-    } finally {
-      setState((prev) => ({ ...prev, loading: false }));
-    }
-  };
-
-  const signOut = async () => {
-    try {
-      await auth.signOut();
-    } catch (error) {
-      console.error('Error signing out:', error);
-      throw error;
+      handleAuthError(error);
     }
   };
 
@@ -90,25 +104,31 @@ export function AuthProvider({ children }: AuthProviderProps) {
     try {
       setState((prev) => ({ ...prev, loading: true, error: null }));
       await sendPasswordResetEmail(auth, email);
-    } catch (error) {
-      setState((prev) => ({
-        ...prev,
-        error: error instanceof Error ? error : new Error('An unknown error occurred'),
-      }));
-    } finally {
-      setState((prev) => ({ ...prev, loading: false }));
+    } catch (error: any) {
+      handleAuthError(error);
     }
   };
 
-  const value = {
-    user: state.user,
-    loading: state.loading,
+  const signOut = async () => {
+    try {
+      setState((prev) => ({ ...prev, loading: true, error: null }));
+      await firebaseSignOut(auth);
+    } catch (error: any) {
+      handleAuthError(error);
+    }
+  };
+
+  const value: AuthContextType = {
+    ...state,
     signIn,
     signUp,
     signOut,
     resetPassword,
-    auth,
   };
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={value}>
+      {children}
+    </AuthContext.Provider>
+  );
 }
