@@ -7,6 +7,14 @@ This project is a web and mobile application platform for liquor retailers in Ja
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![Version](https://img.shields.io/badge/version-0.1.0-green.svg)
 
+## MVP Scope
+
+The initial release (MVP) focuses specifically on supporting the acquisition and management of **Online Liquor Sales Licenses** (通信販売業免許). This targeted approach allows us to:
+- Address specific needs of online liquor retailers
+- Provide specialized guidance for e-commerce requirements
+- Focus on technical requirements like age verification systems
+- Streamline the application process for online sales permits
+
 ## 🚀 Quick Start
 
 ```bash
